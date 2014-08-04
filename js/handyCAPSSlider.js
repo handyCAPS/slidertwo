@@ -8,6 +8,10 @@ function HandyCAPSSlider() {
 															window.webkitRequestAnimationFrame ||
 															window.msRequestAnimationFrame;
 
+	var cancelAnimationFrame = 	window.cancelAnimationFrame ||
+															window.mozCancelAnimationFrame ||
+															window.webkitCancelAnimationFrame;
+
 
 	this.getNodes = function(selector) {
 		if (!document.querySelectorAll) {
@@ -32,17 +36,17 @@ function HandyCAPSSlider() {
 		var
 		wrapper = this.getUnique(this.itemWrapper)[0],
 		items = this.getUnique(this.items),
-		imgs = this.getUnique(this.items + ' img');
+		imgs = wrapper.querySelectorAll('img');
 
-		this.getNodes(this.container)[0].style += '; overflow: hidden';
+		this.containerNode.style += '; overflow: hidden';
 		wrapper.style = ' white-space: nowrap;';
 
 		for (var i = 0; i < items.length; i++) {
-			items[i].style = 'display: inline-block; width: 100%;';
+			items[i].style += ';display: inline-block; width: 100%;';
 		}
 
 		for (var j = 0; j < imgs.length; j++) {
-			imgs[j].style = 'vertical-align: middle; width: 100%';
+			imgs[j].style += ';vertical-align: middle; width: 100%';
 		}
 
 	};
@@ -70,19 +74,36 @@ function HandyCAPSSlider() {
 	this.move = 0;
 	this.rev = false;
 
+	this.slide = 1;
+
 	this.animate = function() {
 
-		if (!this.rev && this.move < 1000) {
+		var itemWidth = parseInt(window.getComputedStyle(this.itemNodes[0]).getPropertyValue('width'),10);
+
+		var totalWidth = itemWidth * --this.itemNodes.length;
+
+		
+
+		var timePassed = Math.floor((Date.now() - this.start) / 1000);
+
+		if (!this.rev && timePassed > this.slideDur && this.move < itemWidth * this.slide) {
 			this.wrapperNode.style.transform = 'translateX(-' + this.move + 'px)';
-			this.move++;
-		} else {
-			this.rev = true;
-			this.wrapperNode.style.transform = 'translateX(-' + this.move + 'px)';
-			this.move--;
-			if (this.move < 1) {this.rev = false;}
+			this.move += Math.floor(itemWidth / parseInt(this.animDur * 60)) - 1;
+		} 
+
+		if (timePassed > this.slideDur + this.animDur) {
+			this.start = Date.now();
+			this.slide++; 
 		}
 
-		requestAnimationFrame(this.animate.bind(this));
+		if (this.move > totalWidth) {
+			this.slide = 1;
+			this.move = 0;
+		}
+
+
+
+		this.animId = requestAnimationFrame(this.animate.bind(this));
 	};
 
 	this.init = function() {
@@ -91,14 +112,21 @@ function HandyCAPSSlider() {
 		this.container     = options.container || '.container';
 		this.items         = options.items || '.slider-item';
 
+		this.animDur = options.animationDuration || 2;
+		this.slideDur = options.slideDuration || 6;
+
 		this.containerNode = this.getNodes(this.container)[0];
+		this.itemNodes = this.getUnique(this.items);
+
+		this.start = Date.now();
 
 		this.wrapItems();
 
 		this.basicCSS();
 
-		console.log(this.wrapperNode.style);
+		this.animate();
 
-		this.animId = requestAnimationFrame(this.animate.bind(this));
+
+		//this.animId = requestAnimationFrame(this.animate.bind(this));
 	};
 }
