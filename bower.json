@@ -1,0 +1,17 @@
+{
+  "name": "handyCAPSSlider",
+  "version": "2.0.0",
+  "authors": [
+    "handyCAPS"
+  ],
+  "description": "Vanilla js slider",
+  "main": "index.html",
+  "license": "MIT",
+  "ignore": [
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "qunit": "~1.14.0"
+  }
+}
