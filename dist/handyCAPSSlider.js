@@ -73,39 +73,59 @@ function HandyCAPSSlider() {
 		this.wrapperNode = this.getUnique(this.itemWrapper)[0];
 	};
 
+	this.moveWrapper = function(pos) {
+		this.wrapperNode.style.transform = 'translateX(-' + pos + 'px)';
+	};
+
 	this.move = 0;
 	this.rev = false;
+
+	this.calls = 1;
 
 	this.slide = 1;
 
 	this.animate = function() {
 
+		this.animId = requestAnimationFrame(this.animate.bind(this));
+
+		this.calls++;
+
 		var itemWidth = parseInt(window.getComputedStyle(this.itemNodes[0]).getPropertyValue('width'),10);
 
 		var totalWidth = itemWidth * --this.itemNodes.length;
 
-		
-
 		var timePassed = Math.floor((Date.now() - this.start) / 1000);
 
+		var fps = this.calls / timePassed;
+
+		if (timePassed > this.animDur) {console.log(this.calls);}
+
 		if (!this.rev && timePassed > this.slideDur && this.move < itemWidth * this.slide) {
-			this.wrapperNode.style.transform = 'translateX(-' + this.move + 'px)';
-			this.move += Math.floor(itemWidth / parseInt(this.animDur * 60)) - 1;
-		} 
+			this.moveWrapper(this.move);
+			this.move += itemWidth / fps;
+		}
 
 		if (timePassed > this.slideDur + this.animDur) {
 			this.start = Date.now();
-			this.slide++; 
+			this.calls = 1;
+			this.slide++;
+			return;
 		}
 
-		if (this.move > totalWidth) {
+		if (this.move > totalWidth && timePassed > this.slideDur) {
+			this.rev = true;
 			this.slide = 1;
-			this.move = 0;
 		}
 
+		if (this.rev) {
+			if (this.move > 0) {
+				this.moveWrapper(this.move);
+				this.move -= totalWidth / (this.animDur * 60);
+			} else {
+				this.rev = false;
+			}
+		}
 
-
-		this.animId = requestAnimationFrame(this.animate.bind(this));
 	};
 
 	this.init = function() {
@@ -115,7 +135,7 @@ function HandyCAPSSlider() {
 		this.items         = options.items || '.slider-item';
 
 		this.animDur = options.animationDuration || 2;
-		this.slideDur = options.slideDuration || 6;
+		this.slideDur = options.slideDuration || 2;
 
 		this.containerNode = this.getNodes(this.container)[0];
 		this.itemNodes = this.getUnique(this.items);
