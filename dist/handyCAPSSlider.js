@@ -1,4 +1,4 @@
-/*! handyCAPSSlider - v2.0.0 - 2014-08-04
+/*! handyCAPSSlider - v2.0.0 - 2014-08-05
 * Copyright (c) 2014 handyCAPS; Licensed MIT */
 
 
@@ -13,6 +13,8 @@ function HandyCAPSSlider() {
 	var cancelAnimationFrame = 	window.cancelAnimationFrame ||
 															window.mozCancelAnimationFrame ||
 															window.webkitCancelAnimationFrame;
+
+	var prefixes = ['ms','moz','webkit','o'];
 
 
 	this.getNodes = function(selector) {
@@ -40,15 +42,18 @@ function HandyCAPSSlider() {
 		items = this.getUnique(this.items),
 		imgs = wrapper.querySelectorAll('img');
 
-		this.containerNode.style += '; overflow: hidden';
-		wrapper.style = ' white-space: nowrap;';
+		this.containerNode.style.overflow = 'hidden';
+
+		wrapper.style.whiteSpace = 'nowrap';
 
 		for (var i = 0; i < items.length; i++) {
-			items[i].style += ';display: inline-block; width: 100%;';
+			items[i].style.display = 'inline-block';
+			items[i].style.width = '100%';
 		}
 
 		for (var j = 0; j < imgs.length; j++) {
-			imgs[j].style += ';vertical-align: middle; width: 100%';
+			imgs[j].style.verticalAlign = 'middle';
+			imgs[j].style.width = '100%';
 		}
 
 	};
@@ -74,13 +79,15 @@ function HandyCAPSSlider() {
 	};
 
 	this.moveWrapper = function(pos) {
-		this.wrapperNode.style.transform = 'translateX(-' + pos + 'px)';
+
+		this.wrapperNode.style.transform = 'translateX(-' + pos + '%)';
+		
 	};
 
 	this.move = 0;
 	this.rev = false;
 
-	this.calls = 1;
+	this.calls = 0;
 
 	this.slide = 1;
 
@@ -90,41 +97,27 @@ function HandyCAPSSlider() {
 
 		this.calls++;
 
-		var itemWidth = parseInt(window.getComputedStyle(this.itemNodes[0]).getPropertyValue('width'),10);
+		var itemWidth = parseInt(window.getComputedStyle(this.itemNodes[0]).getPropertyValue('width').replace(/[^0-9]/g,''),10);
 
-		var totalWidth = itemWidth * --this.itemNodes.length;
+		var totalWidth = itemWidth * this.itemNodes.length;
 
-		var timePassed = Math.floor((Date.now() - this.start) / 1000);
+		var timePassed = Math.ceil((Date.now() - this.start) / 1000);
 
 		var fps = this.calls / timePassed;
 
-		if (timePassed > this.animDur) {console.log(this.calls);}
-
-		if (!this.rev && timePassed > this.slideDur && this.move < itemWidth * this.slide) {
-			this.moveWrapper(this.move);
-			this.move += itemWidth / fps;
-		}
-
-		if (timePassed > this.slideDur + this.animDur) {
-			this.start = Date.now();
-			this.calls = 1;
-			this.slide++;
-			return;
-		}
-
-		if (this.move > totalWidth && timePassed > this.slideDur) {
-			this.rev = true;
-			this.slide = 1;
-		}
-
-		if (this.rev) {
-			if (this.move > 0) {
+		if (timePassed > this.slideDur) {
+			if (this.move <= 100 * this.slide) {
 				this.moveWrapper(this.move);
-				this.move -= totalWidth / (this.animDur * 60);
+				this.move += Math.ceil((100 / fps) / this.itemNodes.length);
+				//console.log(this.move);
 			} else {
-				this.rev = false;
+				console.log(timePassed);
+				this.slide++;
+				this.start = Date.now();
 			}
+			
 		}
+
 
 	};
 
