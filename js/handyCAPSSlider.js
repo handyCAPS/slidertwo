@@ -107,12 +107,12 @@ function HandyCAPSSlider() {
 			if (this.move <= 100 * this.slide) {
 				this.moveWrapper(this.move);
 				this.move += Math.ceil((100 / fps) / this.itemNodes.length);
-				//console.log(this.move);
 			} else {
 				console.log(timePassed);
 				this.slide++;
 				this.start = Date.now();
 			}
+			
 			
 		}
 
