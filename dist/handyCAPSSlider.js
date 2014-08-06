@@ -1,7 +1,5 @@
-/*! handyCAPSSlider - v2.0.0 - 2014-08-05
-* Copyright (c) 2014 handyCAPS; Licensed MIT */
 
-
+///document.querySelectorAll = null;
 
 function HandyCAPSSlider() {
 
@@ -14,19 +12,19 @@ function HandyCAPSSlider() {
 															window.mozCancelAnimationFrame ||
 															window.webkitCancelAnimationFrame;
 
-	var prefixes = ['ms','moz','webkit','o'];
+	var prefixes = ['webkit','moz','ms','o'];
 
 
 	this.getNodes = function(selector) {
-		if (!document.querySelectorAll) {
+		if (typeof document.querySelectorAll !== 'function') {
 			return document.getElementsByClassName(this.classify(selector).slice(1));
 		}
 		return document.querySelectorAll(this.classify(selector));
 	};
 
 	this.getUnique = function(selector) {
-		if (!document.querySelectorAll) {
-			return document.getElementsByClassName(this.container.slice(1) + ' ' + this.classify(selector).slice(1));
+		if (typeof document.querySelectorAll !== 'function') {
+			return [document.getElementsByClassName(this.container.slice(1) + ' ' + this.classify(selector).slice(1))];
 		}
 		return document.querySelectorAll(this.container + ' ' + this.classify(selector));
 	};
@@ -40,7 +38,7 @@ function HandyCAPSSlider() {
 		var
 		wrapper = this.getUnique(this.itemWrapper)[0],
 		items = this.getUnique(this.items),
-		imgs = wrapper.querySelectorAll('img');
+		imgs = this.getUnique(this.items + ' img');
 
 		this.containerNode.style.overflow = 'hidden';
 
@@ -81,7 +79,7 @@ function HandyCAPSSlider() {
 	this.moveWrapper = function(pos) {
 
 		this.wrapperNode.style.transform = 'translateX(-' + pos + '%)';
-		
+
 	};
 
 	this.move = 0;
@@ -105,17 +103,16 @@ function HandyCAPSSlider() {
 
 		var fps = this.calls / timePassed;
 
-		if (timePassed > this.slideDur) {
+		if (timePassed > this.slideDur + this.animDur) {
 			if (this.move <= 100 * this.slide) {
 				this.moveWrapper(this.move);
 				this.move += Math.ceil((100 / fps) / this.itemNodes.length);
-				//console.log(this.move);
 			} else {
-				console.log(timePassed);
 				this.slide++;
 				this.start = Date.now();
 			}
-			
+
+
 		}
 
 
@@ -141,7 +138,6 @@ function HandyCAPSSlider() {
 
 		this.animate();
 
-
-		//this.animId = requestAnimationFrame(this.animate.bind(this));
+		this.animId = requestAnimationFrame(this.animate.bind(this));
 	};
 }
